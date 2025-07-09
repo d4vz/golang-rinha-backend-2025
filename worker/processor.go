@@ -1,6 +1,7 @@
 package worker
 
 import (
+	"github.com/d4vz/rinha-de-backend-2025/config"
 	"github.com/d4vz/rinha-de-backend-2025/payment"
 	"github.com/gofiber/fiber/v2/log"
 )
@@ -49,17 +50,17 @@ func (wp *WorkerPool) processPayments(q chan *payment.Payment) {
 		err := wp.paymentService.SendToDefaultProcessor(p)
 
 		if err != nil {
-			log.Errorf("Erro ao enviar pagamento para o processador fallback: %v. Reenfileirando na fila persistente...", err)
-			payment.EnqueuePayment(*p)
-			continue
+			log.Errorf("Erro ao enviar pagamento para o processador default: %v. Tentando fallback...", err)
+			p.Processor = config.FallbackProcessorName
+			err = wp.paymentService.SendToFallbackProcessor(p)
+
+			if err != nil {
+				log.Errorf("Erro ao enviar pagamento para o processador fallback: %v. Pagamento será descartado.", err)
+				payment.EnqueuePayment(*p)
+				continue
+			}
+
 		}
-
-		// if err != nil {
-		// 	log.Errorf("Erro ao enviar pagamento para o processador default: %v. Tentando fallback...", err)
-		// 	p.Processor = config.FallbackProcessorName
-		// 	err = wp.paymentService.SendToFallbackProcessor(p)
-
-		// }
 
 		if err := payment.CreatePayment(*p); err != nil {
 			log.Errorf("Erro ao criar registro do pagamento: %v. Pagamento será descartado.", err)

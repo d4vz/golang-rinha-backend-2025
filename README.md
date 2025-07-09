@@ -19,15 +19,16 @@ A aplicação foi desenhada para ser **leve**, **resiliente** e **escalável** d
 - **PostgreSQL** armazena os pagamentos efetivamente processados, permitindo consultas de resumo consistentes.
 - **Circuit-Breaker** (`sony/gobreaker`) previne _thundering-herd_ nos processadores em falha.
 
-```text
-┌────────┐      █ API 01 ─┐                       ┌───────────────┐
-│ k6 /   │──▶  █ API 02 ─┼──▶ Redis  ──▶ Workers ─▶ payment-proc  │
-│ tester │      └───────┘│                       │  default      │
-└────────┘               │                       └───────────────┘
-                         └──▶ PostgreSQL         ┌───────────────┐
-                                                 │ payment-proc  │
-                                                 │  fallback     │
-                                                 └───────────────┘
+```mermaid
+flowchart LR
+    client["k6 / tester"] --> api01["API 01"]
+    client --> api02["API 02"]
+    api01 --> redis[Redis]
+    api02 --> redis
+    redis --> workers["Workers Pool"]
+    workers --> pg[PostgreSQL]
+    workers --> procDefault["payment-processor-default"]
+    workers --> procFallback["payment-processor-fallback"]
 ```
 
 ---
