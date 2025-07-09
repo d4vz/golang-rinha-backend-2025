@@ -1,6 +1,6 @@
 # Rinha de Backend 2025 – Backend em Go
 
-[![Repositório no GitHub](https://img.shields.io/badge/GitHub-Repo-blue?logo=github)](https://github.com/d4vz/golang-rinha-backend-2025)
+[Repositório no GitHub](https://github.com/d4vz/golang-rinha-backend-2025)
 
 ![Go](https://img.shields.io/badge/Go-1.24-blue)
 ![Fiber](https://img.shields.io/badge/Fiber-v2-green)
